@@ -165,23 +165,26 @@ def convert_pdf_to_txt(url):
     fp.close()
     device.close()
     retstr.close()
-    text = re.sub("-\n[\s]*","",text)
-    return re.sub("[\s]+"," ",text)
+    return strip_text_from_breaks(text)
+
+
+def strip_text_from_breaks(text):
+    text = re.sub("-\n[\s]*", "", text)
+    return re.sub("[\s]+", " ", text)
+
+
+def get_cite_match(text, article_name):
+    pattern = re.compile(f".+([\[\(])([\d]+)([\]\)]).+{re.escape(strip_text_from_breaks(article_name))}.+$")
+    return pattern.match(text)
+
+
+article_name = "Scalable Hierarchical Aggregation Protocol (SHArP): A Hardware Architecture for Efficient Data Reduction"
+url = 'https://dl.acm.org/doi/pdf/10.1145/3152434.3152461'
+txt = convert_pdf_to_txt(url)
+m = get_cite_match(txt, article_name)
+start_braces, cite_number, end_braces = m.groups()[0:3]
+txt = txt[:m.start(1)]
 
 
 def get_match_idx(subsring, text):
     return [(m.start(0), m.end(0)) for m in re.finditer(subsring, text)]
-
-
-article_name = "Scalable Hierarchical Aggregation Protocol (SHArP): A Hardware Architecture for Efficient Data Reduction"
-
-txt = convert_pdf_to_txt('https://dl.acm.org/doi/pdf/10.1145/3152434.3152461')
-
-article_name_idx = txt.find(article_name)
-
-re.search(".+([\[\(].+)$",txt[:article_name_idx])
-re.s("\[\d+\]",)
-
-txt[get_match_idx("\[15\]",txt)[-1][0]:]
-txt[get_match_idx("\[15\]",txt)[-1][0]-10:get_match_idx("\[15\]",txt)[-1][1]]
-article_name in txt
